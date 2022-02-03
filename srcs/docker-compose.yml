@@ -1,0 +1,64 @@
+version: '2.3'
+services:
+
+  mariadb:
+    build: ./requirements/mariadb
+    image: mariadb
+    init: true
+    container_name: some-mariadb
+    volumes:
+      - mariadb-vol:/home/mariadb-vol
+    env_file:
+      - .env
+    networks:
+      - backend
+    restart: always
+
+  nginx:
+    build: ./requirements/nginx
+    image: nginx
+    init: true
+    container_name: some-nginx
+    hostname: suchida
+    domainname: 42.fr
+    ports:
+      - "443:443"
+    volumes:
+      - wordpress-vol:/var/www/html/wordpress
+    env_file:
+      - .env
+    networks:
+      - frontend
+    restart: always
+
+  wordpress:
+    build: ./requirements/wordpress
+    image: wordpress
+    init: true
+    container_name: some-wordpress
+    volumes:
+      - wordpress-vol:/var/www/html/wordpress
+    env_file:
+      - .env
+    networks:
+      - frontend
+      - backend
+    restart: always
+
+volumes:
+  mariadb-vol:
+    driver_opts:
+      type: none
+      device: /home/suchida/data/mariadb
+      o: bind
+  wordpress-vol:
+    driver_opts:
+      type: none
+      device: /home/suchida/data/wordpress
+      o: bind
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
